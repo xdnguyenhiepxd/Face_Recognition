@@ -80,7 +80,36 @@ def TuyChon():
     except:
         print("Vui long nhap lai!")
 ```
- 
+### 2.3 Tạo hàm Thêm
+* Hàm ```Them()``` dùng để lưu lại 10 ảnh khuôn mặt và lưu vào trong cơ sở dữ liệu.
+```python
+def Them():
+    Ten = input("Nhap ten cua ban: ") # Nhập tên muốn thêm vào dữ liệu
+    try:
+        os.mkdir("HinhAnh")# Tạo thư mục Hình Ảnh để thêm dữ liệu nếu thư mục chưa có thì sẽ tạo nếu không thì sẽ tạo thư mục còn không sẽ đẩy vào hàm xử lý lỗi (except)
+    except:
+        pass
+    try:
+        os.mkdir("HinhAnh/" + Ten)# Tạo thư mục Tên bên trong thư mục Hình Ảnh để thêm dữ liệu nếu thư mục chưa có thì sẽ tạo nếu không thì sẽ tạo thư mục còn không sẽ đẩy vào hàm xử lý lỗi (except)
+        cap = cv2.VideoCapture(0)# Mở camera
+        for i in range(10):# Hàm sẽ chạy từ 0 đến 9 mục đích để lưu 10 ảnh khuôn mặt vào thư mục ứng với tên đã tạo
+            ret, anh = cap.read()# Đọc 1 hình ảnh trên camera
+            chuyen_doi_anh = cv2.cvtColor(anh, cv2.COLOR_BGR2RGB)# Chuyển đổi màu ảnh đã đọc sang dạng RGB (Red-Green-Blue)
+            nhan_dien_khuon_mat = face_cascade.detectMultiScale(chuyen_doi_anh, scaleFactor=1.1, minNeighbors=5)# Nhận diện khuôn mặt và trả về các giá trị tạo độ, chiều rộng, chiều dài của khuôn mặt nhận diện được
+            for (toa_do_x, toa_do_y, chieu_dai, chieu_rong) in nhan_dien_khuon_mat:# Khởi tạo vòng lặp để lấy các giá trị trả về mục đích để lấy khuôn mặt và ghi vào thư mục
+                cat_khuon_mat = anh[toa_do_y:toa_do_y + chieu_dai, toa_do_x:toa_do_x + chieu_rong]# Khi đã có các giá trị và sẽ thực hiện cắt khuôn mặt trong ảnh nhằm mục đích giảm dung lượng lưu trữ
+                cv2.imwrite("HinhAnh/" + Ten + "/" + Ten + str(i) + ".JPG", cat_khuon_mat)# Hàm sẽ thực hiện ghi các ảnh vào thư mục
+                cv2.rectangle(anh, (toa_do_x, toa_do_y), (toa_do_x + chieu_dai, toa_do_y + chieu_rong), (255, 0, 0),2)# Vẽ hình chữ nhận bao quanh khuôn mặt
+                cv2.putText(anh, "Them "+Ten, (chieu_dai // 2, toa_do_y), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0),2, cv2.LINE_AA)# Vẽ chữ ứng với tên trên hình chữ nhật
+            cv2.imshow("Them anh", anh)# Hiển thị ảnh ra màn hình
+    except:
+        print("Da co thu muc")
+```
+* Giải thích:
+  * Hàm ```face_cascade.detectMultiScale()``` truyền 2 tham số **scaleFactor** và **minNeighbors**.
+    * **scaleFactor** dùng để thay đổi tỉ lệ kích thước của hình ảnh. Tỉ lệ càng giảm thấp thì số lượng tìm được khuôn mặt càng cao. Ví dụ: 1.03 là giảm 3%, 1.05 là giảm 5%. Rủi ro khi cho tỉ lệ thấp sẽ ảnh hưởng đến nhận diện những vị trí không phải khuôn mặt. Thông thường tỉ lệ là 1.1.
+
+
 
 ![ImageScale](https://user-images.githubusercontent.com/88564663/140603742-6cc0731f-5aac-4ebf-9d65-6191ba330029.png)
 
