@@ -106,14 +106,51 @@ def Them():
         print("Da co thu muc")
 ```
 * Giải thích:
-  * Hàm ```face_cascade.detectMultiScale()``` truyền 2 tham số **scaleFactor** và **minNeighbors**.
-    * **scaleFactor** dùng để thay đổi tỉ lệ kích thước của hình ảnh. Tỉ lệ càng giảm thấp thì số lượng tìm được khuôn mặt càng cao. Ví dụ: 1.03 là giảm 3%, 1.05 là giảm 5%. Rủi ro khi cho tỉ lệ thấp sẽ ảnh hưởng đến nhận diện những vị trí không phải khuôn mặt. Thông thường tỉ lệ là 1.1.
+  * Hàm ```face_cascade.detectMultiScale()``` truyền 2 tham số **scaleFactor** và **minNeighbors** để tìm các khuôn mặt:
+    * **scaleFactor** dùng để thay đổi tỉ lệ kích thước của hình ảnh. Tỉ lệ càng giảm thấp thì số lượng tìm được khuôn mặt càng cao. Ví dụ: 1.03 là giảm 3%, 1.05 là giảm 5%. Rủi ro khi cho tỉ lệ thấp sẽ ảnh hưởng đến nhận diện những vị trí không phải khuôn mặt và thời gian để nhận diện sẽ tăng. Thông thường tỉ lệ là 1.1.
 
+    ![ImageScale](https://user-images.githubusercontent.com/88564663/140603742-6cc0731f-5aac-4ebf-9d65-6191ba330029.png)
+    
+    * **minNeighbors** dùng để tìm các khuôn mặt lân cận theo khoảng cách đã cho. Giá trị càng thấp như 0 hoặc 1 thì tìm được số lượng khuôn mặt càng cao nhưng sẽ nhận được những khuôn mặt bị trùng nhau và thời gian để nhận diện sẽ tăng. Thuông thường giá trị là 5.
 
-
-![ImageScale](https://user-images.githubusercontent.com/88564663/140603742-6cc0731f-5aac-4ebf-9d65-6191ba330029.png)
+**minNeighbors = 0**
 
 ![image](https://user-images.githubusercontent.com/88564663/140614875-6c4c6202-fa2d-4cd9-8d89-4d2f6a0d1e11.png)
 
+**minNeighbors = 5**
+
 ![image](https://user-images.githubusercontent.com/88564663/140614900-3aa0a9fe-981a-4a4f-8ed4-02932c514e59.png)
 
+### 2.4 Tạo hàm Huấn Luyện
+* Hàm ```HuanLuyen()`` dùng để tìm khuôn mặt có giá trị đúng lớn nhất ứng với mỗi người có trong cơ sở dữ liệu.
+```python
+def HuanLuyen():
+    for ThuMuc in os.listdir("HinhAnh"):
+        if ThuMuc + ".npy" not in os.listdir("HinhAnh/" + ThuMuc):
+            List = []
+            phan_tram = 100 / len(os.listdir("HinhAnh/" + ThuMuc))
+            for i, Ten in enumerate(os.listdir("HinhAnh/" + ThuMuc)):
+                Dem = 0
+                anh = cv2.imread("HinhAnh/" + ThuMuc + "/" + Ten)
+                chuyen_doi_mau_anh = cv2.cvtColor(anh, cv2.COLOR_BGR2RGB)
+                ma_hoa_anh = face_recognition.face_encodings(chuyen_doi_mau_anh)[0]
+                for Train in os.listdir("HinhAnh/" + ThuMuc):
+                    anh_train = cv2.imread("HinhAnh/" + ThuMuc + "/" + Train)
+                    chuyen_doi_mau_anh = cv2.cvtColor(anh_train, cv2.COLOR_BGR2RGB)
+                    ma_hoa_anh_train = face_recognition.face_encodings(chuyen_doi_mau_anh)[0]
+                    kiem_tra = face_recognition.compare_faces([ma_hoa_anh_train], ma_hoa_anh, tolerance=0.4)
+                    if kiem_tra[0] == True:
+                        Dem += 1
+                List.append(Dem)
+                print("Dang ma hoa: " + str(format(phan_tram * (i + 1), ".2f")) + "%")
+            index = List.index(max(List))
+            for id, Ten in enumerate(os.listdir("HinhAnh/" + ThuMuc)):
+                if id != index:
+                    os.remove("HinhAnh/" + ThuMuc + "/" + Ten)
+                else:
+                    anh = cv2.imread("HinhAnh/" + ThuMuc + "/" + Ten)
+                    chuyen_doi_mau_anh = cv2.cvtColor(anh, cv2.COLOR_BGR2RGB)
+                    ma_hoa_anh = face_recognition.face_encodings(chuyen_doi_mau_anh)[0]
+                    np.save("HinhAnh/" + ThuMuc + "/" + ThuMuc, ma_hoa_anh)
+                    print("Ma hoa thanh cong!")
+```
