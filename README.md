@@ -187,3 +187,9 @@ def NhanDien():
         if key == 27: # Ấn ESC (27) thì sẽ thoát
             break
 ```
+## 3. Tổng kết
+* Mô hình nhận diện khuôn mặt phần lớn nhận diện với người lớn và nó không hoạt động tốt đối với trẻ con.
+* Đối với những bài toán thực tế thì độ chính xác sẽ không thể đúng 100%. Các giá trị của **scaleFactor** và **minNeighbors** sẽ phải thay đổi để có thể nhận diện đúng với từng dự án khác nhau.
+## 4. Cảm ơn
+* Cảm ơn bạn đã đọc và xem dự án của mình.
+
