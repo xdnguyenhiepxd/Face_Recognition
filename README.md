@@ -125,34 +125,37 @@ def Them():
 * Hàm ```HuanLuyen()``` dùng để lấy 1 hình ảnh và so sánh với các ảnh cùng thư mục với nó để tìm ra ảnh nào có giá trị đúng lớn nhât ứng với mỗi người có trong cơ sở dữ liệu và mã hoá rồi cho vào file có đuôi .npy. Khi mã hoá sẽ xoá các ảnh có giá trị đúng thấp hơn đi.
 ```python
 def HuanLuyen():
-    for ThuMuc in os.listdir("HinhAnh"): # Hàm os.listdir() trả về các tên thư mục con chứa trong thư mục cha
-        if ThuMuc + ".npy" not in os.listdir("HinhAnh/" + ThuMuc): # Kiểm tra trong các thư mục con có file đuôi .npy chưa nếu chưa thì bắt đầu huấn luyện
-            List = [] # Tạo mảng để lưu các giá trị đúng của mỗi hình ảnh
-            phan_tram = 100 / len(os.listdir("HinhAnh/" + ThuMuc)) # Khởi tạo biến phần trăm để xem tiến trình 
-            for i, Ten in enumerate(os.listdir("HinhAnh/" + ThuMuc)): # Duyệt các ảnh có trong từng thư mục con
-                Dem = 0 # Khởi tạo biến đếm
-                anh = cv2.imread("HinhAnh/" + ThuMuc + "/" + Ten) # Đọc hình ảnh
-                chuyen_doi_mau_anh = cv2.cvtColor(anh, cv2.COLOR_BGR2RGB) # Chuyển đổi màu ảnh đã đọc sang dạng RGB (Red-Green-Blue)
-                ma_hoa_anh = face_recognition.face_encodings(chuyen_doi_mau_anh)[0] # Mã hoá khuôn mặt thành dạng mảng với 128 chiều và lấy khuôn mặt thứ [0] (Chỉ mã hoá được khi ảnh chuyển sang dạng RGB)
-                for Train in os.listdir("HinhAnh/" + ThuMuc): # Duyệt các ảnh có trong từng thư mục con
-                    anh_train = cv2.imread("HinhAnh/" + ThuMuc + "/" + Train) # Đọc hình ảnh
-                    chuyen_doi_mau_anh = cv2.cvtColor(anh_train, cv2.COLOR_BGR2RGB) # Chuyển đổi màu ảnh đã đọc sang dạng RGB (Red-Green-Blue)
-                    ma_hoa_anh_train = face_recognition.face_encodings(chuyen_doi_mau_anh)[0] # Mã hoá khuôn mặt thành dạng mảng với 128 chiều và lấy khuôn mặt thứ [0] (Chỉ mã hoá được khi ảnh chuyển sang dạng RGB)
-                    kiem_tra = face_recognition.compare_faces([ma_hoa_anh_train], ma_hoa_anh, tolerance=0.4) # So sánh 2 khuôn mặt đã được mã hoá ứng với sai số 0.4 (tolerance)
-                    if kiem_tra[0] == True: #Khi 2 khuôn mặt trả về giá trị đúng (True) thì sẽ tăng biến đếm lên 1
-                        Dem += 1 
-                List.append(Dem) # Khi thực hiện so sánh 1 ảnh với các ảnh xong thì sẽ thêm giá trị đếm vào danh sách
-                print("Dang ma hoa: " + str(format(phan_tram * (i + 1), ".2f")) + "%") # Hiển thị tiến trình
-            index = List.index(max(List)) # Khi đã hoàn thành tiến trình thì sẽ lấy vị trí có giá trị lớn nhất trong mảng và truyền vào biến index
-            for id, Ten in enumerate(os.listdir("HinhAnh/" + ThuMuc)): # Duyệt các ảnh có trong từng thư mục con
-                if id != index:# Kiểm tra giá trị vị trí ảnh có trùng với giá trị index hay không nếu không trùng thì sẽ xoá hình ảnh
-                    os.remove("HinhAnh/" + ThuMuc + "/" + Ten) 
-                else: # Nếu trùng với index sẽ đọc hình ảnh và mã hoá rồi cho vào file .npy
-                    anh = cv2.imread("HinhAnh/" + ThuMuc + "/" + Ten) # Đọc hình ảnh
-                    chuyen_doi_mau_anh = cv2.cvtColor(anh, cv2.COLOR_BGR2RGB) # Chuyển đổi màu ảnh đã đọc sang dạng RGB (Red-Green-Blue)
-                    ma_hoa_anh = face_recognition.face_encodings(chuyen_doi_mau_anh)[0] # Mã hoá khuôn mặt thành dạng mảng với 128 chiều và lấy khuôn mặt thứ [0] (Chỉ mã hoá được khi ảnh chuyển sang dạng RGB)
-                    np.save("HinhAnh/" + ThuMuc + "/" + ThuMuc, ma_hoa_anh) # Lưu mảng vào file đuôi .npy và đưa vào thư mục ứng với mỗi người
-                    print("Ma hoa thanh cong!") # Hiển thị đã mã hoá thành công
+    try:
+        for ThuMuc in os.listdir("HinhAnh"):  # Hàm os.listdir() trả về các tên thư mục con chứa trong thư mục cha
+            if ThuMuc + ".npy" not in os.listdir("HinhAnh/" + ThuMuc):  # Kiểm tra trong các thư mục con có file đuôi .npy chưa nếu chưa thì bắt đầu huấn luyện
+                List = []  # Tạo mảng để lưu các giá trị đúng của mỗi hình ảnh
+                phan_tram = 100 / len(os.listdir("HinhAnh/" + ThuMuc))  # Khởi tạo biến phần trăm để xem tiến trình
+                for i, Ten in enumerate(os.listdir("HinhAnh/" + ThuMuc)):  # Duyệt các ảnh có trong từng thư mục con
+                    Dem = 0  # Khởi tạo biến đếm
+                    anh = cv2.imread("HinhAnh/" + ThuMuc + "/" + Ten)  # Đọc hình ảnh
+                    chuyen_doi_mau_anh = cv2.cvtColor(anh,cv2.COLOR_BGR2RGB)  # Chuyển đổi màu ảnh đã đọc sang dạng RGB (Red-Green-Blue)
+                    ma_hoa_anh = face_recognition.face_encodings(chuyen_doi_mau_anh)[0]  # Mã hoá khuôn mặt thành dạng mảng với 128 chiều và lấy khuôn mặt thứ [0] (Chỉ mã hoá được khi ảnh chuyển sang dạng RGB)
+                    for Train in os.listdir("HinhAnh/" + ThuMuc):  # Duyệt các ảnh có trong từng thư mục con
+                        anh_train = cv2.imread("HinhAnh/" + ThuMuc + "/" + Train)  # Đọc hình ảnh
+                        chuyen_doi_mau_anh = cv2.cvtColor(anh_train,cv2.COLOR_BGR2RGB)  # Chuyển đổi màu ảnh đã đọc sang dạng RGB (Red-Green-Blue)
+                        ma_hoa_anh_train = face_recognition.face_encodings(chuyen_doi_mau_anh)[0]  # Mã hoá khuôn mặt thành dạng mảng với 128 chiều và lấy khuôn mặt thứ [0] (Chỉ mã hoá được khi ảnh chuyển sang dạng RGB)
+                        kiem_tra = face_recognition.compare_faces([ma_hoa_anh_train], ma_hoa_anh,tolerance=0.4)  # So sánh 2 khuôn mặt đã được mã hoá ứng với sai số 0.4 (tolerance)
+                        if kiem_tra[0] == True:  # Khi 2 khuôn mặt trả về giá trị đúng (True) thì sẽ tăng biến đếm lên 1
+                            Dem += 1
+                    List.append(Dem)  # Khi thực hiện so sánh 1 ảnh với các ảnh xong thì sẽ thêm giá trị đếm vào danh sách
+                    print("Dang ma hoa: " + str(format(phan_tram * (i + 1), ".2f")) + "%")  # Hiển thị tiến trình
+                index = List.index(max(List))  # Khi đã hoàn thành tiến trình thì sẽ lấy vị trí có giá trị lớn nhất trong mảng và truyền vào biến index
+                for id, Ten in enumerate(os.listdir("HinhAnh/" + ThuMuc)):  # Duyệt các ảnh có trong từng thư mục con
+                    if id != index:  # Kiểm tra giá trị vị trí ảnh có trùng với giá trị index hay không nếu không trùng thì sẽ xoá hình ảnh
+                        os.remove("HinhAnh/" + ThuMuc + "/" + Ten)
+                    else:  # Nếu trùng với index sẽ đọc hình ảnh và mã hoá rồi cho vào file .npy
+                        anh = cv2.imread("HinhAnh/" + ThuMuc + "/" + Ten)  # Đọc hình ảnh
+                        chuyen_doi_mau_anh = cv2.cvtColor(anh,cv2.COLOR_BGR2RGB)  # Chuyển đổi màu ảnh đã đọc sang dạng RGB (Red-Green-Blue)
+                        ma_hoa_anh = face_recognition.face_encodings(chuyen_doi_mau_anh)[0]  # Mã hoá khuôn mặt thành dạng mảng với 128 chiều và lấy khuôn mặt thứ [0] (Chỉ mã hoá được khi ảnh chuyển sang dạng RGB)
+                        np.save("HinhAnh/" + ThuMuc + "/" + ThuMuc,ma_hoa_anh)  # Lưu mảng vào file đuôi .npy và đưa vào thư mục ứng với mỗi người
+                        print("Ma hoa thanh cong!")  # Hiển thị đã mã hoá thành công
+    except:
+        pass
 ```
 
 ### 2.5 Tạo hàm Nhận Diện
