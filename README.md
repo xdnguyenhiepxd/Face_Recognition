@@ -122,7 +122,7 @@ def Them():
 ![image](https://user-images.githubusercontent.com/88564663/140614900-3aa0a9fe-981a-4a4f-8ed4-02932c514e59.png)
 
 ### 2.4 Tạo hàm Huấn Luyện
-* Hàm ```HuanLuyen()`` dùng để lấy 1 hình ảnh và so sánh với các ảnh cùng thư mục với nó để tìm ra ảnh nào có giá trị đúng lớn nhât ứng với mỗi người có trong cơ sở dữ liệu và mã hoá rồi cho vào file có đuôi .npy. Khi mã hoá sẽ xoá các ảnh có giá trị đúng thấp hơn đi.
+* Hàm ```HuanLuyen()``` dùng để lấy 1 hình ảnh và so sánh với các ảnh cùng thư mục với nó để tìm ra ảnh nào có giá trị đúng lớn nhât ứng với mỗi người có trong cơ sở dữ liệu và mã hoá rồi cho vào file có đuôi .npy. Khi mã hoá sẽ xoá các ảnh có giá trị đúng thấp hơn đi.
 ```python
 def HuanLuyen():
     for ThuMuc in os.listdir("HinhAnh"): # Hàm os.listdir() trả về các tên thư mục con chứa trong thư mục cha
@@ -153,4 +153,37 @@ def HuanLuyen():
                     ma_hoa_anh = face_recognition.face_encodings(chuyen_doi_mau_anh)[0] # Mã hoá khuôn mặt thành dạng mảng với 128 chiều và lấy khuôn mặt thứ [0] (Chỉ mã hoá được khi ảnh chuyển sang dạng RGB)
                     np.save("HinhAnh/" + ThuMuc + "/" + ThuMuc, ma_hoa_anh) # Lưu mảng vào file đuôi .npy và đưa vào thư mục ứng với mỗi người
                     print("Ma hoa thanh cong!") # Hiển thị đã mã hoá thành công
+```
+
+### 2.5 Tạo hàm Nhận Diện
+* Hàm ```NhanDien()``` sẽ mở Camera và hiển thị tên tương ứng với khuôn mặt được tìm thấy nếu không tìm thấy sẽ hiển thị không có tên.
+```python
+def NhanDien():
+    cap = cv2.VideoCapture(0)
+    while True:
+        ret, anh = cap.read()
+        chuyen_doi_mau_anh = cv2.cvtColor(anh, cv2.COLOR_BGR2RGB)
+        try:
+            nhan_dien_khuon_mat = face_cascade.detectMultiScale(chuyen_doi_mau_anh, scaleFactor=1.1, minNeighbors=5)
+            Ten = [] # Tạo mảng tên để lưu các tên cần hiển thị
+            for i in range(len(nhan_dien_khuon_mat)):
+                x, y, w, h = nhan_dien_khuon_mat[i]
+                anh_webcam = chuyen_doi_mau_anh[y:y + h, x:x + w] # Giới hạn khuôn mặt để giúp mã hoá nhanh hơn thay vì cả khung hình
+                ma_hoa_anh_webcam = face_recognition.face_encodings(anh_webcam)[0] 
+                for ThuMuc in os.listdir("HinhAnh"):
+                    ma_hoa_anh_thu_muc = np.load("HinhAnh/" + ThuMuc + "/" + ThuMuc + ".npy") # Nạp các khuôn mặt đã mã hoá
+                    kiem_tra = face_recognition.compare_faces([ma_hoa_anh_webcam], ma_hoa_anh_thu_muc, tolerance=0.4)
+                    if kiem_tra[0] == True: # Kiểm tra nếu đúng khuôn mặt thì sẽ thêm vào mảng Tên và thoát khỏi vòng lặp
+                        Ten.append(ThuMuc)
+                        break
+                if kiem_tra[0] != True: # Khi thực hiện kiểm tra xong mà kết quả trả về không đúng thì sẽ thêm Không Có Tên vào mảng Tên
+                    Ten.append("Khong co ten")
+                cv2.rectangle(anh, (x, y), (x + w, y + h), (255, 0, 0), 2)
+                cv2.putText(anh, Ten[i], (h, y), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
+        except:
+            pass
+        cv2.imshow("Nhan dien", anh)
+        key = cv2.waitKey(1) # Hàm cv2.waitKey() truyền vào tham số là 1 thì sẽ nhận các sự kiện từ bàn phím
+        if key == 27: # Ấn ESC (27) thì sẽ thoát
+            break
 ```
