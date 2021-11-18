@@ -94,8 +94,7 @@ def Them():
         cap = cv2.VideoCapture(0)# Mở camera
         for i in range(10):# Hàm sẽ chạy từ 0 đến 9 mục đích để lưu 10 ảnh khuôn mặt vào thư mục ứng với tên đã tạo
             ret, anh = cap.read()# Đọc 1 hình ảnh trên camera
-            chuyen_doi_anh = cv2.cvtColor(anh, cv2.COLOR_BGR2RGB)# Chuyển đổi màu ảnh đã đọc sang dạng RGB (Red-Green-Blue)
-            nhan_dien_khuon_mat = face_cascade.detectMultiScale(chuyen_doi_anh, scaleFactor=1.1, minNeighbors=5)# Nhận diện khuôn mặt và trả về các giá trị tạo độ, chiều rộng, chiều dài của khuôn mặt nhận diện được
+            nhan_dien_khuon_mat = face_cascade.detectMultiScale(anh, scaleFactor=1.1, minNeighbors=5)# Nhận diện khuôn mặt và trả về các giá trị tạo độ, chiều rộng, chiều dài của khuôn mặt nhận diện được
             for (toa_do_x, toa_do_y, chieu_dai, chieu_rong) in nhan_dien_khuon_mat:# Khởi tạo vòng lặp để lấy các giá trị trả về mục đích để lấy khuôn mặt và ghi vào thư mục
                 cat_khuon_mat = anh[toa_do_y:toa_do_y + chieu_dai, toa_do_x:toa_do_x + chieu_rong]# Khi đã có các giá trị và sẽ thực hiện cắt khuôn mặt trong ảnh nhằm mục đích giảm dung lượng lưu trữ
                 cv2.imwrite("HinhAnh/" + Ten + "/" + Ten + str(i) + ".JPG", cat_khuon_mat)# Hàm sẽ thực hiện ghi các ảnh vào thư mục
